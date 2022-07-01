@@ -1,0 +1,6 @@
+**~
+**/dist-newstyle/
+**/dist/
+**/result
+**.DS_Store
+**/bin
