@@ -1,8 +1,8 @@
-module Sixteen (ValidTix(..), Input(..), fn', run, run', sumInvalids', parseRules, parseNearby, parseMyTicket, parseInput, shrinkFits, flipRowCol) where
+module Sixteen (ValidTix(..), Input(..), run, run', sumInvalids', parseRules, parseNearby, parseMyTicket, parseInput, shrinkFits, shrinkFits', flipRowCol, shrinkFitCol) where
 
 import Protolude hiding (State)
 
-import Protolude.Unsafe (unsafeHead)
+import Protolude.Unsafe (unsafeHead, unsafeIndex)
 import qualified Data.Map.Strict as M
 import qualified Text.Trifecta as Tri
 import qualified Data.Text as T
@@ -10,7 +10,9 @@ import Data.Text (pack, unpack)
 import Data.Ix (inRange)
 import qualified Data.Vector as V
 import Data.Vector (Vector, imap)
-import qualified Data.Vector.Unboxed.Mutable as MV
+import qualified Data.Vector.Unboxed.Mutable as MUV
+import qualified Data.Vector.Mutable as MV
+import Control.Monad.Primitive (PrimState)
 
 type Rules = Map Text ((Int, Int), (Int, Int))
 type Ticket = Vector Int
@@ -104,13 +106,19 @@ decodeMyTicket input =
     shrinkFits valids fits
 
 shrinkFits :: [ValidTix Ticket] -> [Rules] -> [Text]
-shrinkFits tx rs = V.toList . fmap (unsafeHead . M.keys) $ V.imap fn (V.fromList rs)
-  where
-    fn :: Int -> Rules -> Rules
-    fn ri rs = M.fromList $ foldr fn' (M.toList rs) $ fmap runValid tx
+shrinkFits = (fmap.fmap) unsafeHead . shrinkFits'
 
-fn' :: Ticket -> [(Text, ((Int,Int),(Int,Int)))] -> [(Text, ((Int,Int),(Int,Int)))]
-fn' t rs = filter (\r -> or (V.map (\i -> valid [snd r] i) t)) rs
+shrinkFits' :: [ValidTix Ticket] -> [Rules] -> [[Text]]
+shrinkFits' tx rs = V.toList $ V.imap shrinkCols ticketCols
+  where
+    shrinkCols ti c = fmap fst . shrinkFitCol c . M.toList $ unsafeIndex rs ti
+    ticketCols = flipRowCol . V.fromList . fmap runValid $ tx
+
+shrinkFitCol :: Ticket -> [(Text, ((Int,Int),(Int,Int)))] -> [(Text, ((Int,Int),(Int,Int)))]
+shrinkFitCol t rs = filter flt rs
+  where
+    flt :: (Text, ((Int,Int),(Int,Int))) -> Bool
+    flt (_,rs') = and $ V.map (\t' -> inRange (fst rs') t' || inRange (snd rs') t') t
 
 justValids :: Rules -> [Ticket] -> [ValidTix Ticket]
 justValids rs = (fmap.fmap) Valid $ filter (\t -> null $ justInvalids rs t)
@@ -118,13 +126,7 @@ justValids rs = (fmap.fmap) Valid $ filter (\t -> null $ justInvalids rs t)
 generateFits :: Rules -> Ticket -> [Rules]
 generateFits rs = V.toList . V.map (const rs)
 
-
-flipRowCol :: Vector (Vector a) -> Maybe (Vector (Vector a))
-flipRowCol as = undefined
-  -- let
-  --   V.imap fn as
-  -- where
-
-  --   fn col bs = V.imap fn' bs
-
-  --   fn' row c = undefined
+flipRowCol :: Show a => Vector (Vector a) -> Vector (Vector a)
+flipRowCol a = V.imap (\ r -> imap (\ c x -> (a V.! c) V.! r)) newVecs
+  where
+    newVecs = V.replicate (V.length (a V.! 1)) (V.replicate (V.length a) ((a V.! 0) V.! 0))

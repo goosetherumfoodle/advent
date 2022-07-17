@@ -77,7 +77,6 @@ nearby tickets:
 
   describe "run" $ do
     it "lists the fields of your ticket, in order" $ do
-      pending
       let
         input = [r|
 class: 0-1 or 4-19
@@ -99,55 +98,90 @@ nearby tickets:
 
   describe "shrinkFits" $ do
     it "shranks" $ do
-      pending
       let
         tix = fmap Valid [
-            vec [11,12,13]
-          , vec [3,9,18]
-          , vec [15,1,5]
-          , vec [5,14,9]
+            vec [11, 0, 22]
+          , vec [19, 8, 30]
+          , vec [10, 2, 20]
+          , vec [20, 9, 28]
           ]
 
         rules = [
           M.fromList [
-          ("class", ((0,1),(4,19)))
-          , ("row", ((0,5),(8,19)))
-          , ("seat", ((0,13),(16,19)))
+          ("class", ((0,2),(8,10)))
+          , ("row", ((10,12),(18,20)))
+          , ("seat", ((20,22),(28,30)))
           ]
-                , M.fromList [
-          ("class", ((0,1),(4,19)))
-          , ("row", ((0,5),(8,19)))
-          , ("seat", ((0,13),(16,19)))
+          , M.fromList [
+          ("class", ((0,2),(8,10)))
+          , ("row", ((10,12),(18,20)))
+          , ("seat", ((20,22),(28,30)))
           ]
-                ,     M.fromList [
-          ("class", ((0,1),(4,19)))
-          , ("row", ((0,5),(8,19)))
-          , ("seat", ((0,13),(16,19)))
+          , M.fromList [
+          ("class", ((0,2),(8,10)))
+          , ("row", ((10,12),(18,20)))
+          , ("seat", ((20,22),(28,30)))
           ]
-                ]
+          ]
 
         result = shrinkFits tix rules
 
       result `shouldBe` ["row", "class", "seat"]
 
-  describe "flipRowCol" $ do
-    it "flips the row an column of each element" $  do
+  describe "shrinkFitCol" $ do
+    it "shrinks a fit to column" $ do
       let
-        input = vec [
-            vec ["a1", "a2", "a3"]
-          , vec ["b1", "b2", "b3"]
-          , vec ["c1", "c2", "c3"]
+        ticket = vec [11,3,15,5]
+        rules = [
+            ("class", ((0,1),(4,19)))
+          , ("row", ((0,5),(8,19)))
+          , ("seat", ((0,13),(16,19)))
           ]
 
-        result = flipRowCol input
+        result = shrinkFitCol ticket rules
 
-        expected = vec [
-            vec ["a1", "b1", "c1"]
-          , vec ["a2", "b2", "c2"]
-          , vec ["a3", "b3", "c3"]
-          ]
+      result `shouldBe` [("row", ((0,5),(8,19)))]
 
-      result `shouldBe` (Just expected)
+  describe "flipRowCol" $ do
+    describe "for a square matrix" $ do
+      it "flips the row an column of each element" $  do
+        let
+          input = vec [
+              vec ["a1", "a2", "a3"]
+            , vec ["b1", "b2", "b3"]
+            , vec ["c1", "c2", "c3"]
+            ]
+
+          result = flipRowCol input
+
+          expected = vec [
+              vec ["a1", "b1", "c1"]
+            , vec ["a2", "b2", "c2"]
+            , vec ["a3", "b3", "c3"]
+            ]
+
+        result `shouldBe` expected
+
+    describe "for a rectangular matrix" $ do
+      it "flips the row an column of each element" $  do
+        let
+          input = vec [
+              vec ["a1", "a2", "a3"]
+            , vec ["b1", "b2", "b3"]
+            , vec ["c1", "c2", "c3"]
+            , vec ["d1", "d2", "d3"]
+            ]
+
+          result = flipRowCol input
+
+          expected = vec [
+              vec ["a1", "b1", "c1", "d1"]
+            , vec ["a2", "b2", "c2", "d2"]
+            , vec ["a3", "b3", "c3", "d3"]
+            ]
+
+        result `shouldBe` expected
+
 
 
 vec = V.fromList
