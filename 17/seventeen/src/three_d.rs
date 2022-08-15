@@ -29,30 +29,33 @@ pub fn parse_slice(input: &str) -> State {
             }
         }
     }
-    return output;
+    output
 }
 
 pub fn cycle(cycles: u8, state: &mut State) {
-    let mut cycle = cycles.clone();
+    let mut cycle = cycles;
     while cycle > 0 {
         cycle -= 1;
         next_state(state);
     }
 }
 
-pub fn next_actives<'a>(contentions: HashSet<Coord>, state: &mut State) -> HashSet<Coord> {
+fn cube_should_be_active(currently_active: bool, active_neighbors: usize) -> bool {
+    (currently_active && (2..=3).contains(&active_neighbors))
+        || (!currently_active && active_neighbors == 3)
+}
+
+pub fn next_actives(contentions: HashSet<Coord>, state: &mut State) -> HashSet<Coord> {
     let mut new_actives = HashSet::new();
     for cube in contentions {
         let neighs = get_neighbors(&cube, &mut state.neighbor_lookup);
-        let cube_active = state.active.contains(&cube);
-        let active_ns = neighs.iter().filter(|n| { state.active.contains(&n) }).count();
-        if cube_active && (2 <= active_ns && active_ns <= 3){
-            new_actives.insert(cube);
-        } else if !cube_active && active_ns == 3 {
+        let currently_active = state.active.contains(&cube);
+        let active_neighs = neighs.iter().filter(|n| { state.active.contains(n) }).count();
+        if cube_should_be_active(currently_active, active_neighs) {
             new_actives.insert(cube);
         }
     }
-    return new_actives;
+    new_actives
 }
 
 fn coordinate_transforms() -> Vec<Coord> {
@@ -66,7 +69,7 @@ fn coordinate_transforms() -> Vec<Coord> {
             }
         }
     }
-    return all;
+    all
 }
 
 pub fn build_neighbors(coord: &Coord) -> HashSet<Coord> {
@@ -78,16 +81,16 @@ pub fn build_neighbors(coord: &Coord) -> HashSet<Coord> {
     for dir in dirs {
         neighbors.insert(dir);
     }
-    return neighbors;
+    neighbors
 }
 
-fn get_neighbors<'a,'b>(coord: &'b Coord, lookup: &mut NeighborLookup) -> HashSet<Coord> {
-    match lookup.get(&coord) {
-        Some(neighbors) => { return neighbors.clone() },
+fn get_neighbors(coord: &Coord, lookup: &mut NeighborLookup) -> HashSet<Coord> {
+    match lookup.get(coord) {
+        Some(neighbors) => { neighbors.clone() },
         None            => {
-            let neighbors = build_neighbors(&coord);
+            let neighbors = build_neighbors(coord);
             lookup.insert(*coord, neighbors.clone());
-            return neighbors;
+            neighbors
         },
     }
 }
