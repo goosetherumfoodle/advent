@@ -1,4 +1,0 @@
-unstable_features = true
-version = "two"
-fn_single_line = true
-imports_granularity = "crate"

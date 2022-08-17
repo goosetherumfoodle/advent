@@ -1,0 +1,321 @@
+#+PROPERTY: header-args :exports both :results value code
+
+These are some [[https://adventofcode.com][Advent of Code]] solutions. They consist of two versions of
+each problem, the answer to the first unlocks the second (harder)
+version. For many of these I didn't bother preserving the code for the first version.
+
+The problems start in Ruby, then switch to Haskell, and then
+Rust. The problems get more interesting towards the end.
+
+All of the entries below were solved for both parts of the challenge.
+
+* Ruby
+
+** Day 2: Password Philosophy
+https://adventofcode.com/2020/day/2
+
+Validate passwords.
+
+[[file:2020/2/prt2.rb][Code]].
+
+Given the list of passwords and associated validation policies, count
+the number of valid passwords.
+#+BEGIN_SRC bash :exports both
+cd ./2020/2
+ruby prt2.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+total: 1000	valid: 745
+#+END_SRC
+
+#+RESULTS:
+
+** Day 3: Toboggan Trajectory
+https://adventofcode.com/2020/day/3
+
+Assess different paths down a ski-free-style tree-filled ski slope.
+
+[[file:2020/3/prt1.rb][Code]] and [[file:2020/3/spec/prt1_spec.rb][tests]].
+
+Extending an initial ski slope, and looking at the following angles:
+    Right 1, down 1.
+    Right 3, down 1.
+    Right 5, down 1.
+    Right 7, down 1.
+    Right 1, down 2.
+How many trees would be encountered along each angle and what is the
+    product of them?
+#+BEGIN_SRC bash :exports both
+cd ./2020/3
+ruby prt1.rb 2
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+hits per angle: [74, 189, 65, 63, 30]
+product: 1718180100
+#+END_SRC
+
+** Day 4: Passport Processing
+https://adventofcode.com/2020/day/4
+
+Validate passports given a specific list of rules.
+
+[[file:2020/4/solve_2.rb][Code]] and [[file:2020/4/spec/solve_2_spec.rb][tests]].
+
+How many [[file:2020/4/input][passports]] are valid?
+#+BEGIN_SRC bash :exports both :results code
+cd ./2020/4
+ruby solve_2.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+179
+#+END_SRC
+
+** Day 5: Binary Boarding
+https://adventofcode.com/2020/day/5
+
+Decode a list of boarding passes encoded in
+[[https://en.wikipedia.org/wiki/Binary_space_partitioning][binary space partitioning]].
+
+[[file:2020/5/solve.rb][Code]] and [[file:2020/5/spec/prt1_spec.rb][tests]].
+
+Given all the boarding passes,
+Part one: What is the highest seat ID on a boarding pass?
+Part two: Which seat id is missing from the list?
+#+BEGIN_SRC bash :exports both
+cd ./2020/5
+ruby solve.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Part one: higest seat id: 998
+Part two: missing: 676
+#+END_SRC
+
+** Day 6: Custom Customs
+https://adventofcode.com/2020/day/6
+
+Deciphering affirmative the answers on a customs declaration form for
+everyone on your plane.
+
+[[file:2020/6/solve.rb][Code]] and [[file:2020/6/spec/solve_spec.rb][tests]].
+
+Given the [[file:2020/6/input][affirmative declaration list]],
+Part one: For each group, count the number of questions to which
+/anyone/ answered "yes". What is the sum of those counts?
+
+Part Two: For each group, count the number of questions to which
+/everyone/ answered "yes". What is the sum of those counts?
+#+BEGIN_SRC bash :exports both
+cd ./2020/6
+ruby solve.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+sum of disjunct counts: 6532
+sum of conjunct counts: 3427
+#+END_SRC
+
+** Day 7: Handy Haversacks
+https://adventofcode.com/2020/day/7
+
+Traverse the relationships between bags that can contain other
+bags.
+
+[[file:2020/7/solve.rb][Code]] and [[file:2020/7/spec/solve_spec.rb][tests]].
+
+Given the [[file:2020/7/input][bag rules]]:
+Part one: How many bag colors can eventually contain at least one shiny gold bag?
+Part two: How many individual bags are required inside your single shiny gold bag?
+#+BEGIN_SRC bash :exports both
+cd ./2020/7
+ruby solve.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Part one, possible containers: 259
+part two, required contents: 45018
+#+END_SRC
+
+** Day 8: Handheld Halting
+https://adventofcode.com/2020/day/8
+
+Given assembly code with a fatal loop, first detect the loop, detect
+the broken instruction, fix the instruction and run the program.
+
+[[file:2020/8/solve.rb][Code]] and [[file:2020/8/spec/solve_spec.rb][tests]].
+
+After the (repaired) [[file:2020/8/input][program]] terminates, what is the final accumulator?
+#+BEGIN_SRC bash :exports both
+cd ./2020/8
+ruby solve.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+{:accumulator=>1671, :pointer=>151, :state=>:loop}
+#+END_SRC
+
+** Day 9: Encoding Error
+https://adventofcode.com/2020/day/9
+
+Find the weakness in a fake encryption scheme (eXchange-Masking
+Addition System (XMAS)).
+
+[[file:2020/9/solve.rb][Code]] and [[file:2020/9/spec/solve_spec.rb][tests]].
+
+What is the encryption weakness in your [[file:2020/9/input][XMAS-encrypted list of
+numbers]]?
+#+BEGIN_SRC bash :exports both
+cd ./2020/9
+ruby solve.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+init:	70639851
+sum:	7996275
+
+#+END_SRC
+
+** Day 10: Adapter Array
+https://adventofcode.com/2020/day/10
+
+Determine combinations of valid chains of voltage adapters, given
+specific rules about how they can be linked.
+
+[[file:2020/10/solve.rb][Code]] and [[file:2020/10/spec/solve_spec.rb][tests]].
+
+Part one: Given your set of adapter "joltages," find a chain that uses
+all of your adapters, and count the joltage differences between the
+charging outlet, the adapters, and your device. What is the number of
+1-jolt differences multiplied by the number of 3-jolt differences?
+
+Part two: What is the total number of distinct ways you can arrange the adapters
+to connect the charging outlet to your device?
+#+BEGIN_SRC bash :exports both
+cd ./2020/10
+ruby solve.rb
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Part one, 1 jolt by 3 jolts: 2112
+Part two, total combos: 65792
+
+#+END_SRC
+
+* Haskell
+
+** Day 11: Seating System
+https://adventofcode.com/2020/day/11
+
+Given an initial seating chart, people occupy and leave seats based on
+the number of other occupied seats the occupant would see in eight
+directions.
+
+[[file:2020/haskell/lib/Eleven.hs][Code]] and [[file:2020/haskell/test/ElevenTest.hs][tests]].
+
+Given the [[file:2020/haskell/11/input][initial seating chart]], cycle the seats until they reach an
+equilibrium. How many seats are occupied in the final state?
+#+BEGIN_SRC bash :exports both
+cd ./2020/haskell
+cabal run --allow-newer=base eleven
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Right 1937
+#+END_SRC
+
+** Day 12: Rain Risk
+https://adventofcode.com/2020/day/12
+
+Follow instructions to navigate a ship through a 2D plane.
+
+[[file:2020/haskell/lib/Twelve.hs][Code]] and [[file:2020/haskell/test/TwelveTest.hs][tests]].
+
+Given the [[file:2020/haskell/12/input][input]], what is the manhattan distance between the ship's
+starting position and final position?
+#+BEGIN_SRC bash :exports both
+cd ./2020/haskell
+cabal run --allow-newer=base twelve
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Right 59435
+#+END_SRC
+
+** Day 14: Docking Data
+https://adventofcode.com/2020/day/14
+
+Processes instructions for writing to simulated memory addresses with
+bitmasks.
+
+[[File:2020/haskell/lib/Fourteen.hs][code]] and [[file:2020/haskell/test/FourteenTest.hs][tests]].
+
+Given the [[file:2020/haskell/14/input][input]], what is the sum of all the values in memory after
+completing the instructions?
+#+BEGIN_SRC bash :exports both
+cd ./2020/haskell
+cabal run --allow-newer=base fourteen
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Right 4160009892257
+#+END_SRC
+
+
+** Day 15: Rambunctious Recitation
+https://adventofcode.com/2020/day/15
+
+Generates numbers according to particular rules, and depending on
+previous numbers generated.
+
+Code is [[file:2020/haskell/lib/Fifteen.hs][here]], tests are [[file:2020/haskell/test/FifteenTest.hs][here]].
+
+Given the input, which is just hardcoded in the [[file:2020/haskell/executable/FifteenRun.hs][executable]], what is the 2020th number generated?
+#+BEGIN_SRC bash :exports both
+cd ./2020/haskell
+cabal run --allow-newer=base fifteen
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+Right 59006
+#+END_SRC
+
+* Rust
+
+** Day 17: Conway Cubes
+https://adventofcode.com/2020/day/17
+
+A variation of game-of-life where the game has no border. It starts
+out with a set number of coordinates, but can exand infinitely as more
+coordinates become activated. The first part is three dimensional,
+and the second is four.
+
+[[file:2020/17/seventeen/src/three_d.rs][Part one code]] and [[file:2020/17/seventeen/tests/three_d.rs][tests]]. [[file:2020/17/seventeen/src/four_d.rs][Part two code]] and [[file:2020/17/seventeen/tests/four_d.rs][tests]].
+
+After six cycles, how many active points exists? (The input is just
+hardcoded in the [[file:2020/17/seventeen/src/bin/solve.rs][executable]]).
+#+BEGIN_SRC bash :exports both
+cd ./2020/17/seventeen
+cargo run
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC bash
+3D: after 6 cycles, the count of active cubes is 315
+4D: after 6 cycles, the count of active cubes is 1520
+#+END_SRC

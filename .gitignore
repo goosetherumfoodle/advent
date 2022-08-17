@@ -3,5 +3,6 @@
 **/dist/
 **/result
 **.DS_Store
-**/bin
+**/bin/*
+!**/bin/*.rs
 **target
