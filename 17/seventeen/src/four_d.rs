@@ -85,7 +85,7 @@ fn cube_should_be_active(currently_active: bool, active_neighbors: usize) -> boo
         || (!currently_active && active_neighbors == 3)
 }
 
-Pub fn next_actives(contentions: HashSet<Coord>, state: &mut State) -> HashSet<Coord> {
+pub fn next_actives(contentions: HashSet<Coord>, state: &mut State) -> HashSet<Coord> {
     let mut new_actives = HashSet::new();
     for cube in contentions {
         let neighs = get_neighbors(&cube, &mut state.neighbor_lookup);

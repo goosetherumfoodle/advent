@@ -1,5 +1,3 @@
-require 'pry'
-
 class Solve
 
   PREAMBLE = 25
@@ -54,7 +52,6 @@ class Solve
 
         if sum == sums_to && accum[:prev].size > 1
           accum[:solved] = accum[:prev][0..i].min + accum[:prev][0..i].max
-          binding.pry
         end
 
         accum

@@ -1,9 +1,13 @@
+#[macro_use]
+extern crate lazy_static;
+
 use std::{
     collections::{HashMap, LinkedList},
     iter::Peekable,
     str::Lines,
     mem::swap,
 };
+use regex::Regex;
 use tiles::Tile;
 
 pub mod tiles {
@@ -18,22 +22,22 @@ pub mod tiles {
 
     #[derive(PartialEq, Debug, Clone)]
     pub struct Tile {
-        pub id: String,
-        pub sides: [u16; 4],
+        pub id: u16,
+        pub sides: [u64; 4],
     }
 
     pub struct Input {
-        pub id: String,
-        pub top: u16,
-        pub bottom: u16,
-        pub left: u16,
-        pub right: u16,
+        pub id: u16,
+        pub top: u64,
+        pub bottom: u64,
+        pub left: u64,
+        pub right: u64,
     }
 
     impl Input {
         pub fn build(&self) -> Tile {
             Tile {
-                id: (*self.id).to_string(),
+                id: self.id,
                 sides: [self.top, self.right, self.bottom, self.left],
             }
         }
@@ -41,7 +45,7 @@ pub mod tiles {
 
     impl Tile {
         #[rustfmt::skip]
-        pub fn which(&self, side: u16) -> Option<Side> {
+        pub fn which(&self, side: u64) -> Option<Side> {
             if self.get_top() == side { Some(Top) }
             else if self.get_bottom() == side { Some(Bottom) }
             else if self.get_left() == side { Some(Left) }
@@ -49,10 +53,10 @@ pub mod tiles {
             else { None }
         }
 
-        pub fn get_top(&self) -> u16 { self.sides[0] }
-        pub fn get_bottom(&self) -> u16 { self.sides[2] }
-        pub fn get_left(&self) -> u16 { self.sides[3] }
-        pub fn get_right(&self) -> u16 { self.sides[1] }
+        pub fn get_top(&self) -> u64 { self.sides[0] }
+        pub fn get_bottom(&self) -> u64 { self.sides[2] }
+        pub fn get_left(&self) -> u64 { self.sides[3] }
+        pub fn get_right(&self) -> u64 { self.sides[1] }
     }
 
     pub fn rot_90(tile: &mut Tile) {
@@ -73,8 +77,8 @@ pub mod tiles {
     }
 }
 
-type SideLookup = HashMap<u16, Vec<String>>;
-type TileLookup<'a> = HashMap<String, &'a Tile>;
+type SideLookup = HashMap<u64, Vec<u16>>;
+type TileLookup<'a> = HashMap<u16, &'a Tile>;
 
 pub struct State<'a> {
     pub side_lookup: &'a SideLookup,
@@ -112,7 +116,7 @@ pub fn build_side_lookup(tiles: &Vec<Tile>) -> SideLookup {
         for side in tile.sides {
             all_sides
                 .entry(side)
-                .and_modify(|xs: &mut Vec<String>| xs.push(tile.id.clone()))
+                .and_modify(|xs: &mut Vec<u16>| xs.push(tile.id.clone()))
                 .or_insert_with(|| vec![tile.id.clone()]);
         }
     }
@@ -122,13 +126,17 @@ pub fn build_side_lookup(tiles: &Vec<Tile>) -> SideLookup {
     println!("raw lookup: {:?}", all_sides);
 
     let mut just_shared_sides = HashMap::new();
+    let mut invalids = 0;
     for (side, ids) in all_sides {
         if ids.len() > 2 {
-            panic!("Invalid tile inputs. side: {side}; ids: {:?}", ids);
-        }
-        if ids.len() > 1 {
+            invalids += 1;
+            println!("INVALID: {:?}", ids);
+        } else if ids.len() > 1 {
             just_shared_sides.insert(side, ids);
         }
+    }
+    if invalids > 0 {
+        panic!("{invalids} SideLookup entries with too many ids");
     }
     println!("lookup: {:?}", just_shared_sides);
     just_shared_sides
@@ -152,7 +160,7 @@ fn consume_empty(lines: &mut Peekable<Lines>) {
     }
 }
 
-fn align_upward(tile: &mut Tile, side: u16) {
+fn align_upward(tile: &mut Tile, side: u64) {
     match tile.which(side) {
         Some(tiles::Side::Top) => tiles::rot_180(tile),
         Some(tiles::Side::Right) => tiles::rot_90(tile),
@@ -162,7 +170,7 @@ fn align_upward(tile: &mut Tile, side: u16) {
     }
 }
 
-fn align_downward(tile: &mut Tile, side: u16) {
+fn align_downward(tile: &mut Tile, side: u64) {
     match tile.which(side) {
         Some(tiles::Side::Top) => {}
         Some(tiles::Side::Right) => tiles::rot_270(tile),
@@ -173,7 +181,7 @@ fn align_downward(tile: &mut Tile, side: u16) {
 }
 
 
-fn align_rightward(tile: &mut Tile, side: u16) {
+fn align_rightward(tile: &mut Tile, side: u64) {
     match tile.which(side) {
         Some(tiles::Side::Top) => tiles::rot_270(tile),
         Some(tiles::Side::Right) => tiles::rot_180(tile),
@@ -183,7 +191,7 @@ fn align_rightward(tile: &mut Tile, side: u16) {
     }
 }
 
-fn align_leftward(tile: &mut Tile, side: u16) {
+fn align_leftward(tile: &mut Tile, side: u64) {
     match tile.which(side) {
         Some(tiles::Side::Top) => tiles::rot_90(tile),
         Some(tiles::Side::Right) => {}
@@ -258,8 +266,8 @@ fn build_towards<'a>(
     state: &State,
     push: fn(&mut LinkedList<Tile>, Tile),
     list: &'a mut LinkedList<Tile>,
-    align: fn(&mut Tile, u16),
-    towards: fn(&Tile) -> u16,
+    align: fn(&mut Tile, u64),
+    towards: fn(&Tile) -> u64,
     root_tile: &Tile,
 ) -> &'a mut LinkedList<Tile> {
     let mut next_tile = root_tile.clone();
@@ -278,7 +286,7 @@ fn build_towards<'a>(
             "looking up {next_side}: {:?}",
             state.side_lookup.get(&next_side)
         );
-        let next_tile_ids: &Vec<String> = state
+        let next_tile_ids: &Vec<u16> = state
             .side_lookup
             .get(&next_side)
             .expect("all sides in SideLookup");
@@ -394,7 +402,7 @@ pub fn parse_all_tiles(input: &str) -> Vec<Tile> {
 pub fn parse_tile(input: &str) -> Tile {
     let input = input.trim();
     let mut lines = input.lines().clone();
-    let title = lines.next().unwrap();
+    let id = extract_id(lines.next().unwrap());
     let top = lines.next().unwrap();
     let bottom = lines.last().unwrap();
 
@@ -409,7 +417,7 @@ pub fn parse_tile(input: &str) -> Tile {
         right.push(chars.last().unwrap());
     }
     tiles::Input {
-        id: title.to_string(),
+        id: id,
         top: parse_side(top.chars().collect()),
         bottom: parse_side(bottom.chars().collect()),
         left: parse_side(left),
@@ -418,7 +426,7 @@ pub fn parse_tile(input: &str) -> Tile {
     .build()
 }
 
-pub fn parse_all_sides(input: &str) -> Vec<(String, u16)> {
+pub fn parse_all_sides(input: &str) -> Vec<(u16, u64)> {
     let mut lines = input.trim().lines().peekable();
     let mut out = Vec::new();
     while lines.peek().is_some() {
@@ -433,10 +441,18 @@ pub fn parse_all_sides(input: &str) -> Vec<(String, u16)> {
     out.concat()
 }
 
-pub fn parse_sides(input: &str) -> Vec<(String, u16)> {
+fn extract_id(input: &str) -> u16 {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"Tile ([0-9]+):").unwrap();
+    }
+    let id_str: &str = RE.captures(input).unwrap().get(1).unwrap().as_str();
+    id_str.parse::<u16>().expect("Couldn't parse id: {id_str}")
+}
+
+pub fn parse_sides(input: &str) -> Vec<(u16, u64)> { // horse:  why do we have this plus the parse_tile?!
     let input = input.trim();
     let mut lines = input.lines().clone();
-    let title = lines.next().unwrap();
+    let id = extract_id(lines.next().unwrap());
     let top = lines.next().unwrap();
     let bottom = lines.last().unwrap();
 
@@ -451,35 +467,35 @@ pub fn parse_sides(input: &str) -> Vec<(String, u16)> {
         right.push(chars.last().unwrap());
     }
     vec![
-        (title.to_string(), parse_side(top.chars().collect())),
-        (title.to_string(), parse_side(bottom.chars().collect())),
-        (title.to_string(), parse_side(left)),
-        (title.to_string(), parse_side(right)),
+        (id, parse_side(top.chars().collect())),
+        (id, parse_side(bottom.chars().collect())),
+        (id, parse_side(left)),
+        (id, parse_side(right)),
     ]
 }
 
-pub fn parse_side(side: Vec<char>) -> u16 {
+pub fn parse_side(side: Vec<char>) -> u64 {
     let mut first = 0;
     for (i, chr) in side.iter().enumerate() {
         if *chr == '#' {
-            first += 2_u16.pow((i).try_into().unwrap());
+            first += 2_u64.pow((i).try_into().unwrap());
         }
     }
 
     let mut second = 0;
     for (i, chr) in side.iter().rev().enumerate() {
         if *chr == '#' {
-            second += 2_u16.pow((i).try_into().unwrap());
+            second += 2_u64.pow((i).try_into().unwrap());
         }
     }
 
     cantor_pair(first, second)
 }
 
-pub fn cantor_pair(x: u16, y: u16) -> u16 {
-    let mut x = x as u32;
-    let mut y = y as u32;
+pub fn cantor_pair(x: u64, y: u64) -> u64 {
+    let mut x = x as u64;
+    let mut y = y as u64;
     if x <= y { swap(&mut x, &mut y) }
-
-    (((x + y) % u16::MAX as u32) * ((x + y + 1) % u16::MAX as u32) / (2 + x)) as u16
+    // (((x + y) % u64::MAX as u64) * ((x + y + 1) % u64::MAX as u64) / (2 + x)) as u64
+    ((x + y) * (x + y + 1)) / (2 + x)
 }

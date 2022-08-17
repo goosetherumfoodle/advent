@@ -1,10 +1,10 @@
 use twenty;
 use twenty::tiles;
-use std::collections::{HashSet, HashMap};
+use std::collections::HashMap;
 
 #[test]
 fn test_rot_90() {
-    let mut tile = tiles::Input { id: "id".to_string(),  top: 0, right: 1, bottom: 2, left: 3}.build();
+    let mut tile = tiles::Input { id: 1,  top: 0, right: 1, bottom: 2, left: 3}.build();
 
     tiles::rot_90(&mut tile);
 
@@ -13,7 +13,7 @@ fn test_rot_90() {
 
 #[test]
 fn test_rot_180() {
-    let mut tile = tiles::Input { id: "id".to_string(),  top: 0, right: 1, bottom: 2, left: 3}.build();
+    let mut tile = tiles::Input { id: 1,  top: 0, right: 1, bottom: 2, left: 3}.build();
 
     tiles::rot_180(&mut tile);
 
@@ -22,7 +22,7 @@ fn test_rot_180() {
 
 #[test]
 fn test_rot_270() {
-    let mut tile = tiles::Input { id: "id".to_string(),  top: 0, right: 1, bottom: 2, left: 3}.build();
+    let mut tile = tiles::Input { id: 1,  top: 0, right: 1, bottom: 2, left: 3}.build();
 
     tiles::rot_270(&mut tile);
 
@@ -31,16 +31,15 @@ fn test_rot_270() {
 
 #[test]
 fn test_build_top_segment() {
-    let root_tile = tiles::Input { id: "first".to_string(),  top: 10, right: 1010, bottom: 2020, left: 1 }.build();
+    let root_tile = tiles::Input { id: 1,  top: 10, right: 1010, bottom: 2020, left: 1 }.build();
     let root_row = vec![
         root_tile.clone(),
-        tiles::Input { id: "second".to_string(), top: 777, right: 1, bottom: 888, left: 2 }.build(),
-        tiles::Input { id: "third".to_string(),  top: 222, right: 2, bottom: 333, left: 111 }.build(),
-        tiles::Input { id: "fourth".to_string(), top: 11,  right: 20, bottom: 10, left: 3032 }.build(),
-        tiles::Input { id: "fifth".to_string(),  top: 119, right: 988, bottom: 759, left: 20 }.build(),
-
-        tiles::Input { id: "sixth".to_string(),  top: 132, right: 30, bottom: 11, left: 659 }.build(),
-        tiles::Input { id: "seventh".to_string(),top: 4827, right: 1847, bottom: 9938, left: 30 }.build(),
+        tiles::Input { id: 2, top: 777, right: 1, bottom: 888, left: 2 }.build(),
+        tiles::Input { id: 3,  top: 222, right: 2, bottom: 333, left: 111 }.build(),
+        tiles::Input { id: 4, top: 11,  right: 20, bottom: 10, left: 3032 }.build(),
+        tiles::Input { id: 5,  top: 119, right: 988, bottom: 759, left: 20 }.build(),
+        tiles::Input { id: 6,  top: 132, right: 30, bottom: 11, left: 659 }.build(),
+        tiles::Input { id: 7,  top: 4827, right: 1847, bottom: 9938, left: 30 }.build(),
 
     ];
     let state = twenty::State {
@@ -52,11 +51,11 @@ fn test_build_top_segment() {
 
     let expected = [
         [
-            tiles::Tile { id: "sixth".to_string(), sides: [132, 30, 11, 659] },
-            tiles::Tile { id: "seventh".to_string(), sides: [4827, 1847, 9938, 30] }
+            tiles::Tile { id: 6, sides: [132, 30, 11, 659] },
+            tiles::Tile { id: 7, sides: [4827, 1847, 9938, 30] }
         ], [
-            tiles::Tile { id: "fourth".to_string(), sides: [11, 20, 10, 3032] },
-            tiles::Tile { id: "fifth".to_string(), sides: [119, 988, 759, 20] }
+            tiles::Tile { id: 4, sides: [11, 20, 10, 3032] },
+            tiles::Tile { id: 5, sides: [119, 988, 759, 20] }
         ]
     ];
     assert_eq!(result, expected);
@@ -64,40 +63,40 @@ fn test_build_top_segment() {
 
 #[test]
 fn test_build_row() {
-    let root_tile = tiles::Input { id: "second".to_string(),  top: 20, right: 1, bottom: 8989, left: 2}.build();
+    let root_tile = tiles::Input { id: 2,  top: 20, right: 1, bottom: 8989, left: 2}.build();
     let tiles = vec![
         root_tile.clone(),
-        tiles::Input { id: "skip me".to_string(),  top: 20, right: 555, bottom: 777, left: 777}.build(),
-        tiles::Input { id: "first".to_string(),    top: 111, right: 222, bottom: 2,   left: 333}.build(),
-        tiles::Input { id: "third".to_string(),    top: 1,   right: 999, bottom: 1010, left: 2020}.build(),
+        tiles::Input { id: 777,  top: 20, right: 555, bottom: 777, left: 777}.build(),
+        tiles::Input { id: 1,    top: 111, right: 222, bottom: 2,   left: 333}.build(),
+        tiles::Input { id: 3,    top: 1,   right: 999, bottom: 1010, left: 2020}.build(),
     ];
     let state = twenty::State {
         tile_lookup: &twenty::build_tile_lookup(&tiles),
         side_lookup: &twenty::build_side_lookup(&tiles),
     };
 
-    let result: Vec<String> = twenty::build_row(&state, &root_tile)
+    let result: Vec<u16> = twenty::build_row(&state, &root_tile)
         .iter()
         .map(|t| t.id.clone() )
         .collect();
 
-    let expected = vec!["first", "second", "third"];
+    let expected = vec![1,2,3];
     assert_eq!(result, expected);
 }
 
 #[test]
 fn test_build_side_lookup() {
     let input = vec![
-        tiles::Input { id: "first".to_string(),  top: 1, bottom: 2, left: 3, right: 4 }.build(),
-        tiles::Input { id: "second".to_string(), top: 4, bottom: 5, left: 6, right: 7 }.build(),
-        tiles::Input { id: "third".to_string(),  top: 7, bottom: 8, left: 9, right: 10 }.build(),
+        tiles::Input { id: 1,  top: 1, bottom: 2, left: 3, right: 4 }.build(),
+        tiles::Input { id: 2, top: 4, bottom: 5, left: 6, right: 7 }.build(),
+        tiles::Input { id: 3,  top: 7, bottom: 8, left: 9, right: 10 }.build(),
     ];
 
     let result = twenty::build_side_lookup(&input);
 
     let mut expected = HashMap::new();
-    expected.insert(4, vec!["first".to_string(), "second".to_string()]);
-    expected.insert(7, vec!["second".to_string(), "third".to_string()]);
+    expected.insert(4, vec![1, 2]);
+    expected.insert(7, vec![2, 3]);
     assert_eq!(result, expected);
 }
 
@@ -133,8 +132,8 @@ Tile 1951:
     let result = twenty::parse_all_tiles(input);
 
     let expected = [
-        tiles::Input { id: "Tile 2311:".to_string(), top: 300, bottom: 924, left: 318, right: 616 }.build(),
-        tiles::Input { id: "Tile 1951:".to_string(), top: 397, bottom: 177, left: 587, right: 318 }.build(),
+        tiles::Input { id: 2311, top: 300, bottom: 924, left: 318, right: 616 }.build(),
+        tiles::Input { id: 1951, top: 397, bottom: 177, left: 587, right: 318 }.build(),
     ];
     assert_eq!(result, expected)
 }
@@ -171,14 +170,14 @@ Tile 3079:
     let result = twenty::parse_all_sides(input);
 
     let expected = vec![
-        ("Tile 2311:".to_string(), 300),
-        ("Tile 2311:".to_string(), 231),
-        ("Tile 2311:".to_string(), 498),
-        ("Tile 2311:".to_string(), 616),
-        ("Tile 1951:".to_string(), 397),
-        ("Tile 1951:".to_string(), 564),
-        ("Tile 1951:".to_string(), 841),
-        ("Tile 1951:".to_string(), 318)
+        (2311, 300),
+        (2311, 231),
+        (2311, 498),
+        (2311, 616),
+        (1951, 397),
+        (1951, 564),
+        (1951, 841),
+        (1951, 318)
     ];
     assert_eq!(result, expected)
 }
@@ -202,7 +201,7 @@ Tile 2311:
 
     let result = twenty::parse_tile(input);
 
-    let expected = tiles::Input { id: "Tile 2311:".to_string(), top: 300, bottom: 924, left: 318, right: 616 }.build();
+    let expected = tiles::Input { id: 2311, top: 300, bottom: 924, left: 318, right: 616 }.build();
     assert_eq!(result, expected)
 }
 
@@ -226,36 +225,36 @@ Tile 2311:
     let result = twenty::parse_sides(input);
 
     let expected = vec![
-        ("Tile 2311:".to_string(), 300),
-        ("Tile 2311:".to_string(), 231),
-        ("Tile 2311:".to_string(), 498),
-        ("Tile 2311:".to_string(), 616)
+        (2311, 300),
+        (2311, 231),
+        (2311, 498),
+        (2311, 616)
     ];
     assert_eq!(result, expected)
 }
 
-#[test]
-#[ignore]
-fn test_parse_sides_2() {
-    let input = "
-Tile 3079:
-#.#.#####.
-.--------#
-.--------.
-#--------.
-#--------.
-.--------.
-#--------#
-.--------.
-.--------.
-..#.###...
-";
+// #[test]
+// #[ignore]
+// fn test_parse_sides_2() {
+//     let input = "
+// Tile 3079:
+// #.#.#####.
+// .--------#
+// .--------.
+// #--------.
+// #--------.
+// .--------.
+// #--------#
+// .--------.
+// .--------.
+// ..#.###...
+// ";
 
-    let result = twenty::parse_sides_2(input);
+//     let result = twenty::parse_sides_2(input);
 
-    let expected = vec![vec!['a']];
-    assert_eq!(result, expected)
-}
+//     let expected = vec![vec!['a']];
+//     assert_eq!(result, expected)
+// }
 
 #[test]
 #[ignore]
@@ -396,17 +395,17 @@ Tile 3079:
 
     let expected = vec![
         [
-            tiles::Tile { id: "Tile 2971:".to_string(), sides: [900, 2277, 859, 623] },
-            tiles::Tile { id: "Tile 1489:".to_string(), sides: [935, 323, 1347, 2277] },
-            tiles::Tile { id: "Tile 1171:".to_string(), sides: [148, 1188, 1926, 323] }
+            tiles::Tile { id: 2971, sides: [900, 2277, 859, 623] },
+            tiles::Tile { id: 1489, sides: [935, 323, 1347, 2277] },
+            tiles::Tile { id: 1171, sides: [148, 1188, 1926, 323] }
         ], [
-            tiles::Tile { id: "Tile 2729:".to_string(), sides: [859, 593, 1722, 1578] },
-            tiles::Tile { id: "Tile 1427:".to_string(), sides: [1347, 969, 862, 593] },
-            tiles::Tile { id: "Tile 2473:".to_string(), sides: [1926, 1925, 485, 969] }],
+            tiles::Tile { id: 2729, sides: [859, 593, 1722, 1578] },
+            tiles::Tile { id: 1427, sides: [1347, 969, 862, 593] },
+            tiles::Tile { id: 2473, sides: [1926, 1925, 485, 969] }],
         [
-            tiles::Tile { id: "Tile 1951:".to_string(), sides: [1722, 1333, 971, 2420] },
-            tiles::Tile { id: "Tile 2311:".to_string(), sides: [862, 805, 1441, 1333] },
-            tiles::Tile { id: "Tile 3079:".to_string(), sides: [2057, 410, 485, 805] }
+            tiles::Tile { id: 1951, sides: [1722, 1333, 971, 2420] },
+            tiles::Tile { id: 2311, sides: [862, 805, 1441, 1333] },
+            tiles::Tile { id: 3079, sides: [2057, 410, 485, 805] }
         ]
     ];
     assert_eq!(result, expected);
@@ -422,7 +421,7 @@ fn test_cantor_pair_commutativity() {
 
     assert_eq!(result1, result2);
 }
-// left: `[[Tile { id: "Tile 2971:", sides: [900, 2277, 859, 623] }, Tile { id: "Tile 1489:", sides: [935, 323, 1347, 2277] }, Tile { id: "Tile 1171:", sides: [148, 1188, 1926, 323] }],
+// left: `[[Tile { id: "2971:", sides: [900, 2277, 859, 623] }, Tile { id: "1489:", sides: [935, 323, 1347, 2277] }, Tile { id: "Tile 1171:", sides: [148, 1188, 1926, 323] }],
 //         [Tile { id: "Tile 2729:", sides: [859, 593, 1722, 1578] }, Tile { id: "Tile 1427:", sides: [1347, 969, 862, 593] }, Tile { id: "Tile 2473:", sides: [1926, 1925, 485, 969] }],
 //         [Tile { id: "Tile 1951:", sides: [1722, 1333, 971, 2420] }, Tile { id: "Tile 2311:", sides: [862, 805, 1441, 1333] }, Tile { id: "Tile 3079:", sides: [2057, 410, 485, 805] }]]`
 

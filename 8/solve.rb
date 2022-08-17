@@ -1,3 +1,5 @@
+require 'set'
+
 class Solve
   INITIAL_STATE = {
     accumulator: 0,
