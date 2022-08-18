@@ -233,29 +233,6 @@ Tile 2311:
     assert_eq!(result, expected)
 }
 
-// #[test]
-// #[ignore]
-// fn test_parse_sides_2() {
-//     let input = "
-// Tile 3079:
-// #.#.#####.
-// .--------#
-// .--------.
-// #--------.
-// #--------.
-// .--------.
-// #--------#
-// .--------.
-// .--------.
-// ..#.###...
-// ";
-
-//     let result = twenty::parse_sides_2(input);
-
-//     let expected = vec![vec!['a']];
-//     assert_eq!(result, expected)
-// }
-
 #[test]
 #[ignore]
 fn test_parse_side() {
@@ -391,22 +368,15 @@ Tile 3079:
 ..#.###...
 ";
 
-    let result = twenty::assemble_input(input);
+    let result: Vec<Vec<u16>> = twenty::assemble_input(input)
+        .into_iter()
+        .map(|row| { row.into_iter().map(|t| t.id ).collect() })
+        .collect();
 
     let expected = vec![
-        [
-            tiles::Tile { id: 2971, sides: [900, 2277, 859, 623] },
-            tiles::Tile { id: 1489, sides: [935, 323, 1347, 2277] },
-            tiles::Tile { id: 1171, sides: [148, 1188, 1926, 323] }
-        ], [
-            tiles::Tile { id: 2729, sides: [859, 593, 1722, 1578] },
-            tiles::Tile { id: 1427, sides: [1347, 969, 862, 593] },
-            tiles::Tile { id: 2473, sides: [1926, 1925, 485, 969] }],
-        [
-            tiles::Tile { id: 1951, sides: [1722, 1333, 971, 2420] },
-            tiles::Tile { id: 2311, sides: [862, 805, 1441, 1333] },
-            tiles::Tile { id: 3079, sides: [2057, 410, 485, 805] }
-        ]
+        [2971, 1489, 1171,],
+        [2729, 1427, 2473,],
+        [1951, 2311, 3079,],
     ];
     assert_eq!(result, expected);
 }
@@ -421,49 +391,51 @@ fn test_cantor_pair_commutativity() {
 
     assert_eq!(result1, result2);
 }
-// left: `[[Tile { id: "2971:", sides: [900, 2277, 859, 623] }, Tile { id: "1489:", sides: [935, 323, 1347, 2277] }, Tile { id: "Tile 1171:", sides: [148, 1188, 1926, 323] }],
-//         [Tile { id: "Tile 2729:", sides: [859, 593, 1722, 1578] }, Tile { id: "Tile 1427:", sides: [1347, 969, 862, 593] }, Tile { id: "Tile 2473:", sides: [1926, 1925, 485, 969] }],
-//         [Tile { id: "Tile 1951:", sides: [1722, 1333, 971, 2420] }, Tile { id: "Tile 2311:", sides: [862, 805, 1441, 1333] }, Tile { id: "Tile 3079:", sides: [2057, 410, 485, 805] }]]`
 
-// top: [[Tile { id: "Tile 2971:", sides: [900, 2277, 859, 623] }, Tile { id: "Tile 1489:", sides: [935, 323, 1347, 2277] }, Tile { id: "Tile 1171:", sides: [148, 1188, 1926, 323] }]]
-// root: [Tile { id: "Tile 2729:", sides: [859, 593, 1722, 1578] }, Tile { id: "Tile 1427:", sides: [1347, 969, 862, 593] }, Tile { id: "Tile 2473:", sides: [1926, 1925, 485, 969] }]
-// bott: [[Tile { id: "Tile 1951:", sides: [1722, 1333, 971, 2420] }, Tile { id: "Tile 2311:", sides: [862, 805, 1441, 1333] }, Tile { id: "Tile 3079:", sides: [2057, 410, 485, 805] }]]
+#[test]
+fn test_order_dependencies() {
+    use rand::thread_rng;
+    use rand::seq::SliceRandom;
 
-// top: [[Tile { id: "Tile 2971:", sides: [900, 2277, 859, 623] },
-//        Tile { id: "Tile 1489:", sides: [935, 323, 1347, 2277] },
-//        Tile { id: "Tile 1171:", sides: [148, 1188, 1926, 323] }],
-//       [Tile { id: "Tile 2729:", sides: [859, 593, 1722, 1578] },
-//        Tile { id: "Tile 1427:", sides: [1347, 969, 862, 593] },
-//        Tile { id: "Tile 2473:", sides: [1926, 1925, 485, 969] }]]
-//     root: [Tile { id: "Tile 1951:", sides: [1722, 1333, 971, 2420] },
-//            Tile { id: "Tile 2311:", sides: [862, 805, 1441, 1333] },
-//            Tile { id: "Tile 3079:", sides: [2057, 410, 485, 805] }]
+    for rep in 1..=50 {
 
-// OLD
-
-// [
-//     [Tile { id: "Tile 2729:", sides: [680, 9, 397, 962] }, Tile { id: "Tile 1427:", sides: [183, 348, 300, 9] }, Tile { id: "Tile 2473:", sides: [399, 481, 184, 348] }],
-//     [Tile { id: "Tile 2971:", sides: [532, 689, 680, 78] }, Tile { id: "Tile 1489:", sides: [43, 288, 183, 689] }],
-//     [Tile { id: "Tile 1951:", sides: [397, 318, 177, 587] }, Tile { id: "Tile 2311:", sides: [300, 616, 924, 318] }]]
+        let mut input = vec![
+            tiles::Tile { id: 1427, sides: [743250, 237690, 183810, 173754] },
+            tiles::Tile { id: 2311, sides: [183810, 279974, 800646, 462990] },
+            tiles::Tile { id: 1951, sides: [832861, 462990, 340296, 1439297] },
+            tiles::Tile { id: 1171, sides: [1204329, 49590, 8664, 605610] },
+            tiles::Tile { id: 1489, sides: [416140, 49590, 743250, 1141078] },
+            tiles::Tile { id: 2473, sides: [769777, 62516, 237690, 1204329] },
+            tiles::Tile { id: 2971, sides: [296072, 1141078, 325210, 163482] },
+            tiles::Tile { id: 2729, sides: [325210, 173754, 832861, 927487] },
+            tiles::Tile { id: 3079, sides: [1025457, 65406, 62516, 279974] }
+        ];
+        input.shuffle(&mut thread_rng());
 
 
-// top:
-// [[Tile { id: "Tile 2729:", sides: [680, 9, 397, 962] }, Tile { id: "Tile 1427:", sides: [183, 348, 300, 9] }, Tile { id: "Tile 2473:", sides: [399, 481, 184, 348] }]
-//  [Tile { id: "Tile 2971:", sides: [532, 689, 680, 78] }, Tile { id: "Tile 1489:", sides: [43, 288, 183, 689] }]]
-// [[Tile { id: "Tile 1951:", sides: [397, 318, 177, 587] }, Tile { id: "Tile 2311:", sides: [300, 616, 924, 318] }]]
+        let result_square: Vec<Vec<u16>> = twenty::assemble_tiles(input.clone())
+            .into_iter()
+            .map(|row| { row.into_iter().map(|t| t.id ).collect() })
+            .collect();
+
+        assert_eq!(result_square.len(), 3, "input: {:?}", input);
+        for row in result_square.clone() {
+            assert_eq!(row.len(), 3, "input: {:?}", input);
+        }
 
 
-// top: [[Tile { id: "Tile 2971:", sides: [532, 689, 680, 78] }, Tile { id: "Tile 1489:", sides: [43, 288, 183, 689] }],
-//       [Tile { id: "Tile 2729:", sides: [680, 9, 397, 962] }, Tile { id: "Tile 1427:", sides: [183, 348, 300, 9] }, Tile { id: "Tile 2473:", sides: [399, 481, 184, 348] }]]
-// root: [Tile { id: "Tile 1951:", sides: [397, 318, 177, 587] }, Tile { id: "Tile 2311:", sides: [300, 616, 924, 318] }]
+        let result: u64 =
+            result_square[0][0] as u64 *
+            result_square[0][2] as u64 *
+            result_square[2][0] as u64 *
+            result_square[2][2] as u64;
 
 
-// NEW
+        let expected = 2971 * 1171 * 1951 * 3079;
 
-// [[Tile { id: "Tile 2971:", sides: [532, 689, 680, 78] },
-//   Tile { id: "Tile 1489:", sides: [43, 288, 183, 689] }],
-//  [Tile { id: "Tile 2729:", sides: [680, 9, 397, 962] },
-//   Tile { id: "Tile 1427:", sides: [183, 348, 300, 9] },
-//   Tile { id: "Tile 2473:", sides: [399, 481, 184, 348] }],
-//  [Tile { id: "Tile 1951:", sides: [397, 318, 177, 587] },
-//   Tile { id: "Tile 2311:", sides: [300, 616, 924, 318] }]]
+        assert_eq!(
+            result, expected,
+            "\nINPUT:\n{:?}\nRESULT:\n{:?}", input, result_square,
+        );
+    }
+}

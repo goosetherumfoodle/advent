@@ -48,9 +48,13 @@ pub mod tiles {
         pub fn which(&self, side: u64) -> Option<Side> {
             if self.get_top() == side { Some(Top) }
             else if self.get_bottom() == side { Some(Bottom) }
-            else if self.get_left() == side { Some(Left) }
-            else if self.get_right() == side { Some(Right) }
+            else if self.get_left()   == side { Some(Left) }
+            else if self.get_right()  == side { Some(Right) }
             else { None }
+        }
+
+        pub fn swap_left_right(&mut self) {
+            self.sides.swap(1, 3);
         }
 
         pub fn get_top(&self) -> u64 { self.sides[0] }
@@ -85,8 +89,7 @@ pub struct State<'a> {
     pub tile_lookup: &'a TileLookup<'a>,
 }
 
-pub fn assemble_input(input: &str) -> Vec<Vec<Tile>> {
-    let tiles = parse_all_tiles(input);
+pub fn assemble_tiles(tiles: Vec<Tile>) -> Vec<Vec<Tile>> {
     let root_tile = tiles.get(0).unwrap();
 
     let state = State {
@@ -108,6 +111,10 @@ pub fn assemble_input(input: &str) -> Vec<Vec<Tile>> {
     square.push(root_row);
     square.append(&mut bot_seg);
     square
+}
+
+pub fn assemble_input(input: &str) -> Vec<Vec<Tile>> {
+    assemble_tiles(parse_all_tiles(input))
 }
 
 pub fn build_side_lookup(tiles: &Vec<Tile>) -> SideLookup {
@@ -274,15 +281,15 @@ fn build_towards<'a>(
     let mut next_side = towards(root_tile);
 
     let mut killer = 0;
-    println!("root tile: {:?}", next_tile);
-    println!("start loop looking for: {next_side}: {}", state.side_lookup.get(&next_side).is_some());
+   println!("root tile: {:?}", next_tile);
+   println!("start loop looking for: {next_side}: {}", state.side_lookup.get(&next_side).is_some());
     while state.side_lookup.get(&next_side).is_some() {
         killer += 1;
-        if killer > 5 {
+        if killer > 1000 {
             panic!("infinite loop")
         }
-        println!("next tile: {:?}", next_tile);
-        println!(
+       println!("next tile: {:?}", next_tile);
+       println!(
             "looking up {next_side}: {:?}",
             state.side_lookup.get(&next_side)
         );
@@ -295,16 +302,16 @@ fn build_towards<'a>(
         } else {
             &next_tile_ids[0]
         };
-        println!("next tile id: {next_tile_id}");
+       println!("next tile id: {next_tile_id}");
         next_tile = (*state
             .tile_lookup
             .get(next_tile_id)
             .expect("all sides in TileLookup"))
         .clone();
-        println!("new next tile: {:?}", next_tile);
+       println!("new next tile: {:?}", next_tile);
 
         align(&mut next_tile, next_side);
-        println!("now aligned  : {:?}", next_tile);
+       println!("now aligned  : {:?}", next_tile);
         push(list, (next_tile).clone());
         next_side = towards(&next_tile);
         println!("new next side: {next_side}");
@@ -337,10 +344,14 @@ pub fn build_top_segment(state: &State, bottom_row: &[Tile]) -> Vec<Vec<Tile>> {
 
 
     let mut left_col = LinkedList::new();
-    for tile in &row {
+    for tile in &mut row {
         let mut new_row = LinkedList::new();
         new_row.push_back((*tile).clone());
         build_right(state, &mut new_row, tile);
+        if new_row.len() == 1 {
+            (*tile).swap_left_right();
+            build_right(state, &mut new_row, tile);
+        }
         left_col.push_front(new_row);
     }
 
@@ -364,15 +375,19 @@ fn build_bottom_segment(state: &State, top_row: &[Tile]) -> Vec<Vec<Tile>> {
 
 
     println!("down row: {:?}", row);
-    let mut left_col = Vec::new();
-    for tile in &row {
+    let mut left_col = LinkedList::new();
+    for tile in &mut row {
         let mut new_row = LinkedList::new();
         new_row.push_back((*tile).clone());
         build_right(state, &mut new_row, tile);
-        left_col.push(new_row);
+        if new_row.len() == 1 {
+            (*tile).swap_left_right();
+            build_right(state, &mut new_row, tile);
+        }
+        left_col.push_front(new_row);
     }
 
-    // println!("left_col: {:?}", left_col);
+    println!("left_col: {:?}", left_col);
     let mut out = Vec::new();
     for row in left_col {
         let mut row_vec = Vec::new();
@@ -493,9 +508,8 @@ pub fn parse_side(side: Vec<char>) -> u64 {
 }
 
 pub fn cantor_pair(x: u64, y: u64) -> u64 {
-    let mut x = x as u64;
-    let mut y = y as u64;
+    let mut x = x as f64;
+    let mut y = y as f64;
     if x <= y { swap(&mut x, &mut y) }
-    // (((x + y) % u64::MAX as u64) * ((x + y + 1) % u64::MAX as u64) / (2 + x)) as u64
-    ((x + y) * (x + y + 1)) / (2 + x)
+    (0.5 * (x + y) * (x + y + y) + y).floor() as u64
 }

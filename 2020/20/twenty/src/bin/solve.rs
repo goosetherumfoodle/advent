@@ -1731,71 +1731,13 @@ Tile 2797:
 
 ";
 
-// fn main() {
-    // let sides = twenty::parse_all_sides(INPUT);
-    // let mut count: HashMap<u16, Vec<String>> = HashMap::new();
-    // for (id, int) in sides {
-    //     count
-    //         .entry(int)
-    //         .and_modify(|ns| ns.push(id.clone()))
-    //         .or_insert_with(|| vec![id]);
-    // }
-
-    // let mut count_2: HashMap<usize, u32> = HashMap::new();
-    // for key in count.keys() {
-    //     let found = count.get(key).unwrap();
-    //     count_2
-    //         .entry(found.len())
-    //         .and_modify(|a| *a += 1)
-    //         .or_insert(1);
-    // }
-    // println!("{:?}", count_2);
-// }
-
 fn main() {
     let tiles  = twenty::assemble_input(INPUT);
+    let last = tiles.len() - 1;
     let first  = tiles[0][0].id;
-    let second = tiles[0][2].id;
-    let third = tiles[2][0].id;
-    let fourth = tiles[2][2].id;
-    let answer = first * second * third * fourth;
-    println!("the product of all four sides of the image is: {answer}");
+    let second = tiles[0][last].id;
+    let third = tiles[last][0].id;
+    let fourth = tiles[last][last].id;
+    let answer: u64 = first as u64 * second as u64 * third as u64 * fourth as u64;
+    println!("Part one: the product of all four sides of the image is: {answer}");
 }
-
-
-// Tile 2069:
-// ..#..#..##
-// #.........
-// #....##...
-// #........#
-// #.##.....#
-// .........#
-// .....##...
-// ......#.##
-// ..#.......
-// #.##...##.
-
-// Tile 2749:
-// ##...#.##.
-// ......##..
-// .........#
-// ##.....#.#
-// #.##...##.
-// #.#..#..##
-// ..#...##.#
-// #...#....#
-// ...#....##
-// ..########
-
-
-// Tile 1987:
-// ......#.#.
-// ..#....#..
-// #.......##
-// #...#.....
-// .......#.#
-// #.#...#...
-// .#..#.....
-// .....#.###
-// ..###..#.#
-// ##....#.#.
